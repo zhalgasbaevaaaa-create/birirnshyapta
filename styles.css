@@ -732,10 +732,6 @@ button:focus-visible {
   left: -14%;
 }
 
-.puzzle-piece.last-row {
-  grid-column: span 7;
-}
-
 .puzzle-piece.is-revealing {
   animation: pieceOpen 0.52s cubic-bezier(0.18, 0.82, 0.25, 1.17) forwards;
 }
