@@ -130,6 +130,16 @@
       </footer>
     </main>
 
+    <div id="reveal-overlay" class="reveal-overlay" role="dialog" aria-modal="true" aria-labelledby="reveal-title" hidden>
+      <div id="reveal-stage" class="reveal-stage">
+        <img id="reveal-image" class="reveal-image" src="assets/stone-age-kazakhstan.png" alt="Қазақстан аумағындағы Тас дәуірі көрінісі" />
+        <div class="reveal-topbar">
+          <span id="reveal-title">ТАС ДӘУІРІ ПАЗЛЫ ТОЛЫҚ ЖИНАЛДЫ</span>
+          <span class="reveal-countdown"><strong id="reveal-countdown">20</strong> с</span>
+        </div>
+      </div>
+    </div>
+
     <div id="end-modal" class="modal-backdrop" role="presentation" hidden>
       <section class="end-modal" role="alertdialog" aria-modal="true" aria-labelledby="end-title" aria-describedby="end-description">
         <div id="end-emblem" class="end-emblem" aria-hidden="true">✦</div>
@@ -140,7 +150,20 @@
           <div><span>Ұпай</span><strong id="end-score">0</strong></div>
           <div><span>Ашылған пазл</span><strong id="end-puzzle">0 / 42</strong></div>
         </div>
-        <button id="restart-button" class="primary-action modal-action" type="button">ҚАЙТА БАСТАУ</button>
+        <button id="restart-button" class="primary-action modal-action" type="button">БАСТАУ</button>
+      </section>
+    </div>
+
+    <div id="restart-confirm-modal" class="modal-backdrop" role="presentation" hidden>
+      <section class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-description">
+        <div class="confirm-emblem" aria-hidden="true">↻</div>
+        <p class="panel-kicker">ЖАҢА ОЙЫН</p>
+        <h2 id="confirm-title">ОЙЫНДЫ БАСТАЙМЫЗ БА?</h2>
+        <p id="confirm-description" class="end-description">42 сұрақ, 5 жан және әр сұраққа 10 секунд.</p>
+        <div class="confirm-actions">
+          <button id="confirm-start" class="primary-action modal-action" type="button">БАСТАУ</button>
+          <button id="confirm-cancel" class="secondary-action" type="button">КЕЙІН</button>
+        </div>
       </section>
     </div>
 

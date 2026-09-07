@@ -448,6 +448,8 @@ const ui = {
   puzzleGrid: $("#puzzle-grid"),
   puzzleBoard: $("#puzzle-board"),
   puzzleStatus: $("#puzzle-status"),
+  revealOverlay: $("#reveal-overlay"),
+  revealCountdown: $("#reveal-countdown"),
   modal: $("#end-modal"),
   endKicker: $("#end-kicker"),
   endTitle: $("#end-title"),
@@ -456,6 +458,11 @@ const ui = {
   endPuzzle: $("#end-puzzle"),
   endEmblem: $("#end-emblem"),
   restartButton: $("#restart-button"),
+  confirmModal: $("#restart-confirm-modal"),
+  confirmTitle: $("#confirm-title"),
+  confirmDescription: $("#confirm-description"),
+  confirmStart: $("#confirm-start"),
+  confirmCancel: $("#confirm-cancel"),
 };
 
 const state = {
@@ -464,15 +471,20 @@ const state = {
   questionIndex: 0,
   round: 0,
   timeLeft: TIME_LIMIT,
+  revealTime: 20,
+  started: false,
   locked: false,
   ending: false,
+  revealActive: false,
   feedback: null,
   revealed: Array(TOTAL).fill(false),
 };
 
 let puzzlePieces = [];
 let timerId = null;
+let revealTimerId = null;
 let pendingEndTimer = null;
+let confirmReturnMode = "initial";
 
 function createPuzzle() {
   const fragment = document.createDocumentFragment();
@@ -546,10 +558,10 @@ function startTimer() {
   state.timeLeft = TIME_LIMIT;
   updateTimerUI();
 
-  if (state.locked || state.ending || state.feedback) return;
+  if (!state.started || state.locked || state.ending || state.feedback) return;
 
   timerId = window.setInterval(() => {
-    if (state.locked || state.ending || state.feedback) {
+    if (!state.started || state.locked || state.ending || state.feedback) {
       stopTimer();
       return;
     }
@@ -599,13 +611,13 @@ function renderQuestion() {
     copy.textContent = option.text;
 
     button.append(letter, copy);
-    button.disabled = state.locked || state.ending;
+    button.disabled = !state.started || state.locked || state.ending;
     button.addEventListener("click", () => chooseAnswer(option, button));
     ui.answers.append(button);
   });
 
   renderFeedback();
-  if (!state.locked && !state.ending && !state.feedback) startTimer();
+  if (!state.locked && !state.ending && !state.feedback && state.started) startTimer();
   else updateTimerUI();
 }
 
@@ -641,7 +653,7 @@ function renderFeedback() {
 }
 
 function chooseAnswer(option, button) {
-  if (state.locked || state.ending) return;
+  if (!state.started || state.locked || state.ending || state.lives <= 0) return;
 
   stopTimer();
   state.locked = true;
@@ -673,12 +685,15 @@ function chooseAnswer(option, button) {
   renderQuestion();
 
   if (state.lives === 0) {
-    pendingEndTimer = window.setTimeout(() => showEndModal("gameover"), 620);
+    pendingEndTimer = window.setTimeout(() => {
+      pendingEndTimer = null;
+      showEndModal();
+    }, 620);
   }
 }
 
 function handleTimeout() {
-  if (state.locked || state.ending) return;
+  if (!state.started || state.locked || state.ending || state.lives <= 0) return;
 
   state.locked = true;
   state.lives -= 1;
@@ -694,12 +709,15 @@ function handleTimeout() {
   renderQuestion();
 
   if (state.lives === 0) {
-    pendingEndTimer = window.setTimeout(() => showEndModal("gameover"), 620);
+    pendingEndTimer = window.setTimeout(() => {
+      pendingEndTimer = null;
+      showEndModal();
+    }, 620);
   }
 }
 
 function resetAttempt() {
-  if (state.ending) return;
+  if (state.ending || !state.started) return;
   state.locked = false;
   state.feedback = null;
   renderQuestion();
@@ -709,7 +727,7 @@ function advanceQuestion() {
   if (!state.feedback || !state.feedback.correct || state.ending) return;
 
   if (state.questionIndex === TOTAL - 1) {
-    showEndModal("win");
+    startImageReveal();
     return;
   }
 
@@ -743,34 +761,157 @@ function resetPuzzle() {
   });
 }
 
-function showEndModal(mode) {
-  if (state.ending) return;
+function resetResultUI() {
+  ui.endKicker.textContent = "ОЙЫН АЯҚТАЛДЫ";
+  ui.endTitle.textContent = "ОЙЫН АЯҚТАЛДЫ";
+  ui.endDescription.textContent = "";
+  ui.endScore.textContent = "0";
+  ui.endPuzzle.textContent = `0 / ${TOTAL}`;
+  ui.endEmblem.textContent = "✦";
+  ui.restartButton.textContent = "БАСТАУ";
+}
+
+function showEndModal() {
+  if (state.revealActive) return;
   stopTimer();
   state.ending = true;
   ui.answers.querySelectorAll("button").forEach((button) => {
     button.disabled = true;
   });
 
-  const won = mode === "win";
-  ui.endKicker.textContent = won ? "ҚҰТТЫҚТАЙМЫЗ!" : "ОЙЫН АЯҚТАЛДЫ";
-  ui.endTitle.textContent = won ? "ҚҰТТЫҚТАЙМЫЗ!" : "ОЙЫН АЯҚТАЛДЫ";
-  ui.endDescription.textContent = won
-    ? "Сіз Тас дәуірі пазлын толық жинадыңыз!"
-    : `Сіз ${START_LIVES} жаныңызды пайдаландыңыз.`;
+  ui.endKicker.textContent = "ОЙЫН АЯҚТАЛДЫ";
+  ui.endTitle.textContent = "ОЙЫН АЯҚТАЛДЫ";
+  ui.endDescription.textContent = `Сіз ${START_LIVES} жаныңызды пайдаландыңыз. Жиналған ұпай: ${state.score}.`;
   ui.endScore.textContent = String(state.score);
   ui.endPuzzle.textContent = `${state.score} / ${TOTAL}`;
-  ui.endEmblem.textContent = won ? "✓" : "✦";
-  ui.restartButton.textContent = won ? "ҚАЙТА ОЙНАУ" : "ҚАЙТА БАСТАУ";
+  ui.endEmblem.textContent = "✦";
+  ui.restartButton.textContent = "БАСТАУ";
+  ui.confirmModal.hidden = true;
   ui.modal.hidden = false;
   document.body.classList.add("modal-open");
   window.setTimeout(() => ui.restartButton.focus(), 30);
 }
 
-function restartGame() {
+function updateRevealCountdown() {
+  ui.revealCountdown.textContent = String(state.revealTime);
+}
+
+function requestRevealFullscreen() {
+  const request = ui.revealOverlay.requestFullscreen || ui.revealOverlay.webkitRequestFullscreen;
+  if (!request) return;
+
+  try {
+    const result = request.call(ui.revealOverlay);
+    if (result && typeof result.catch === "function") result.catch(() => {});
+  } catch (_error) {
+    // The fixed overlay remains a fullscreen fallback if the browser denies the API.
+  }
+}
+
+function exitRevealFullscreen() {
+  const exit = document.exitFullscreen || document.webkitExitFullscreen;
+  if (!exit) return;
+
+  try {
+    const result = exit.call(document);
+    if (result && typeof result.catch === "function") result.catch(() => {});
+  } catch (_error) {
+    // The overlay is hidden below even when the browser has no fullscreen API.
+  }
+}
+
+function startImageReveal() {
+  if (state.revealActive) return;
+
+  stopTimer();
+  state.ending = true;
+  state.revealActive = true;
+  state.revealTime = 20;
+  updateRevealCountdown();
+  ui.revealOverlay.hidden = false;
+  document.body.classList.add("reveal-open");
+  requestRevealFullscreen();
+
+  revealTimerId = window.setInterval(() => {
+    state.revealTime -= 1;
+    updateRevealCountdown();
+
+    if (state.revealTime <= 0) finishImageReveal();
+  }, 1000);
+}
+
+function finishImageReveal() {
+  if (!state.revealActive) return;
+
+  if (revealTimerId !== null) {
+    window.clearInterval(revealTimerId);
+    revealTimerId = null;
+  }
+  state.revealActive = false;
+  ui.revealOverlay.hidden = true;
+  document.body.classList.remove("reveal-open");
+  exitRevealFullscreen();
+  openRestartConfirm("complete");
+}
+
+function openRestartConfirm(source) {
+  confirmReturnMode = source;
+  ui.modal.hidden = true;
+  ui.confirmModal.hidden = false;
+  document.body.classList.add("modal-open");
+
+  if (source === "initial") {
+    ui.confirmTitle.textContent = "ОЙЫНДЫ БАСТАЙМЫЗ БА?";
+    ui.confirmDescription.textContent = `${TOTAL} сұрақ, ${START_LIVES} жан және әр сұраққа ${TIME_LIMIT} секунд.`;
+    ui.confirmCancel.hidden = true;
+  } else {
+    ui.confirmTitle.textContent = "ОЙЫНДЫ ҚАЙТА БАСТАЙМЫЗ БА?";
+    ui.confirmDescription.textContent = `Алдыңғы нәтиже: ${state.score} ұпай, ${state.score} / ${TOTAL} пазл. Ескі нәтиже тазаланып, жаңа ойын басталады.`;
+    ui.confirmCancel.hidden = false;
+  }
+
+  ui.confirmStart.textContent = "БАСТАУ";
+  window.setTimeout(() => ui.confirmStart.focus(), 30);
+}
+
+function showCompletionResult() {
+  ui.endKicker.textContent = "ҚҰТТЫҚТАЙМЫЗ!";
+  ui.endTitle.textContent = "ҚҰТТЫҚТАЙМЫЗ!";
+  ui.endDescription.textContent = `Сіз Тас дәуірі пазлын толық жинадыңыз! Ұпай: ${state.score}.`;
+  ui.endScore.textContent = String(state.score);
+  ui.endPuzzle.textContent = `${state.score} / ${TOTAL}`;
+  ui.endEmblem.textContent = "✓";
+  ui.restartButton.textContent = "БАСТАУ";
+  ui.modal.hidden = false;
+  ui.confirmModal.hidden = true;
+}
+
+function cancelRestart() {
+  ui.confirmModal.hidden = true;
+
+  if (confirmReturnMode === "gameover") {
+    ui.modal.hidden = false;
+  } else if (confirmReturnMode === "complete") {
+    showCompletionResult();
+  } else {
+    ui.confirmModal.hidden = false;
+  }
+
+  window.setTimeout(() => {
+    if (confirmReturnMode === "gameover" || confirmReturnMode === "complete") ui.restartButton.focus();
+    else ui.confirmStart.focus();
+  }, 30);
+}
+
+function startNewGame() {
   stopTimer();
   if (pendingEndTimer) {
     window.clearTimeout(pendingEndTimer);
     pendingEndTimer = null;
+  }
+  if (revealTimerId !== null) {
+    window.clearInterval(revealTimerId);
+    revealTimerId = null;
   }
 
   state.lives = START_LIVES;
@@ -778,13 +919,19 @@ function restartGame() {
   state.questionIndex = 0;
   state.round += 1;
   state.timeLeft = TIME_LIMIT;
+  state.revealTime = 20;
+  state.started = true;
   state.locked = false;
   state.ending = false;
+  state.revealActive = false;
   state.feedback = null;
   state.revealed = Array(TOTAL).fill(false);
 
+  ui.revealOverlay.hidden = true;
   ui.modal.hidden = true;
-  document.body.classList.remove("modal-open");
+  ui.confirmModal.hidden = true;
+  document.body.classList.remove("modal-open", "reveal-open");
+  resetResultUI();
   resetPuzzle();
   renderStats();
   renderQuestion();
@@ -800,8 +947,15 @@ ui.primaryAction.addEventListener("click", () => {
   }
 });
 
-ui.restartButton.addEventListener("click", restartGame);
+ui.restartButton.addEventListener("click", () => openRestartConfirm("gameover"));
+ui.confirmStart.addEventListener("click", startNewGame);
+ui.confirmCancel.addEventListener("click", cancelRestart);
 
-createPuzzle();
-renderStats();
-renderQuestion();
+autoStart();
+
+function autoStart() {
+  createPuzzle();
+  renderStats();
+  renderQuestion();
+  openRestartConfirm("initial");
+}
