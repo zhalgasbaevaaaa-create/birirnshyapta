@@ -591,6 +591,7 @@ button:focus-visible {
 }
 
 .puzzle-piece {
+  grid-column: span 3;
   position: relative;
   z-index: 2;
   display: grid;
