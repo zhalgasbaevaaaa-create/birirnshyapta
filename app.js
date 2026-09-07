@@ -598,10 +598,6 @@ function renderQuestion() {
     if (state.feedback && state.feedback.choice === option.text) {
       button.classList.add(state.feedback.correct ? "is-correct" : "is-wrong");
     }
-    if (state.feedback && !state.feedback.correct && option.correct) {
-      button.classList.add("is-correct");
-    }
-
     const letter = document.createElement("span");
     letter.className = "answer-letter";
     letter.textContent = LETTERS[position];
@@ -678,8 +674,8 @@ function chooseAnswer(option, button) {
     correct: false,
     choice: option.text,
     text: state.lives > 0
-      ? `1 жан жоғалды. Қалған жан: ${state.lives}. Дұрыс жауап: ${questions[state.questionIndex].choices[0]}.`
-      : `Сіз ${START_LIVES} жаныңызды пайдаландыңыз. Дұрыс жауап: ${questions[state.questionIndex].choices[0]}.`,
+      ? `1 жан жоғалды. Қалған жан: ${state.lives}. Қайта байқап көріңіз.`
+      : `Сіз ${START_LIVES} жаныңызды пайдаландыңыз.`,
   };
   renderStats();
   renderQuestion();
@@ -702,8 +698,8 @@ function handleTimeout() {
     timeout: true,
     choice: "",
     text: state.lives > 0
-      ? `10 секунд өтті. 1 жан күйді. Қалған жан: ${state.lives}. Дұрыс жауап: ${questions[state.questionIndex].choices[0]}.`
-      : `10 секунд өтті. Сіз ${START_LIVES} жаныңызды пайдаландыңыз. Дұрыс жауап: ${questions[state.questionIndex].choices[0]}.`,
+      ? `10 секунд өтті. 1 жан күйді. Қалған жан: ${state.lives}. Қайта байқап көріңіз.`
+      : `10 секунд өтті. Сіз ${START_LIVES} жаныңызды пайдаландыңыз.`,
   };
   renderStats();
   renderQuestion();
