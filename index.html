@@ -23,7 +23,7 @@
         <div>
           <p class="eyebrow">ИНТЕРАКТИВТІ ТАРИХИ ОЙЫН</p>
           <h1>ҚАЗАҚСТАННЫҢ ТАС ДӘУІРІ</h1>
-          <p class="subtitle">Сұрақтарға дұрыс жауап беріп, тарихи пазлды толық жина!</p>
+          <p class="subtitle">ҰБТ үлгісіндегі сұрақтарға жауап беріп, тарихи пазлды толық жина!</p>
         </div>
         <div class="header-fire" aria-hidden="true">✦</div>
       </header>
@@ -31,7 +31,7 @@
       <section class="score-bar" aria-label="Ойын көрсеткіштері">
         <div class="score-item lives-item">
           <span class="score-label">ЖАН</span>
-          <span id="lives" class="lives" aria-live="polite" aria-label="3 жан">♥ ♥ ♥</span>
+          <span id="lives" class="lives" aria-live="polite" aria-label="5 жан">♥ ♥ ♥ ♥ ♥</span>
         </div>
         <div class="score-divider" aria-hidden="true"></div>
         <div class="score-item">
@@ -41,7 +41,7 @@
         <div class="score-divider" aria-hidden="true"></div>
         <div class="score-item progress-item">
           <span class="score-label">ПАЗЛ</span>
-          <strong id="progress-count" class="score-value">0 / 38</strong>
+          <strong id="progress-count" class="score-value">0 / 42</strong>
         </div>
         <div class="progress-track" aria-hidden="true">
           <span id="progress-fill" class="progress-fill"></span>
@@ -55,7 +55,15 @@
               <p class="panel-kicker">КЕЛЕСІ ТАПСЫРМА</p>
               <h2 id="question-heading">Сұраққа жауап бер</h2>
             </div>
-            <span id="question-number" class="question-number">1 / 38</span>
+            <div class="question-tools">
+              <span id="question-number" class="question-number">1 / 42</span>
+              <div id="timer-box" class="timer-box" role="timer" aria-live="polite" aria-label="10 секунд қалды">
+                <span class="timer-label">УАҚЫТ</span>
+                <strong id="timer">10</strong>
+                <span class="timer-unit">с</span>
+                <span class="timer-track" aria-hidden="true"><span id="timer-fill"></span></span>
+              </div>
+            </div>
           </div>
 
           <div class="question-progress" aria-hidden="true">
@@ -94,7 +102,7 @@
               <p class="panel-kicker">ТАРИХИ ПАЗЛ</p>
               <h2 id="puzzle-heading">Суретті толық жина</h2>
             </div>
-            <span class="puzzle-status" id="puzzle-status">Жабық бөліктер: 38</span>
+            <span class="puzzle-status" id="puzzle-status">Жабық бөліктер: 42</span>
           </div>
 
           <div class="topic-strip" aria-label="Тақырыптар">
@@ -118,7 +126,7 @@
       <footer class="game-footer">
         <span>Тек Тас дәуірі тақырыптары</span>
         <span class="footer-dot" aria-hidden="true"></span>
-        <span>3 жан · дұрыс жауапқа +1 ұпай</span>
+        <span>5 жан · әр сұраққа 10 секунд · дұрыс жауапқа +1 ұпай</span>
       </footer>
     </main>
 
@@ -130,7 +138,7 @@
         <p id="end-description" class="end-description"></p>
         <div class="end-summary">
           <div><span>Ұпай</span><strong id="end-score">0</strong></div>
-          <div><span>Ашылған пазл</span><strong id="end-puzzle">0 / 38</strong></div>
+          <div><span>Ашылған пазл</span><strong id="end-puzzle">0 / 42</strong></div>
         </div>
         <button id="restart-button" class="primary-action modal-action" type="button">ҚАЙТА БАСТАУ</button>
       </section>
