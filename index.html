@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="kk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#2d211b" />
+    <meta
+      name="description"
+      content="Қазақстанның Тас дәуірі туралы сұрақтар мен тарихи пазлдан тұратын интерактивті оқу ойыны."
+    />
+    <title>Қазақстанның тас дәуірі | Тарихи пазл</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="game-header">
+        <div class="header-mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48" role="img">
+            <path d="M8 32 18 10l9 7 13 1-6 20-20 2Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round" />
+            <path d="m18 10 7 21M27 17 21 40M9 32l14-1 11 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          </svg>
+        </div>
+        <div>
+          <p class="eyebrow">ИНТЕРАКТИВТІ ТАРИХИ ОЙЫН</p>
+          <h1>ҚАЗАҚСТАННЫҢ ТАС ДӘУІРІ</h1>
+          <p class="subtitle">Сұрақтарға дұрыс жауап беріп, тарихи пазлды толық жина!</p>
+        </div>
+        <div class="header-fire" aria-hidden="true">✦</div>
+      </header>
+
+      <section class="score-bar" aria-label="Ойын көрсеткіштері">
+        <div class="score-item lives-item">
+          <span class="score-label">ЖАН</span>
+          <span id="lives" class="lives" aria-live="polite" aria-label="3 жан">♥ ♥ ♥</span>
+        </div>
+        <div class="score-divider" aria-hidden="true"></div>
+        <div class="score-item">
+          <span class="score-label">ҰПАЙ</span>
+          <strong id="score" class="score-value" aria-live="polite">0</strong>
+        </div>
+        <div class="score-divider" aria-hidden="true"></div>
+        <div class="score-item progress-item">
+          <span class="score-label">ПАЗЛ</span>
+          <strong id="progress-count" class="score-value">0 / 38</strong>
+        </div>
+        <div class="progress-track" aria-hidden="true">
+          <span id="progress-fill" class="progress-fill"></span>
+        </div>
+      </section>
+
+      <div class="game-layout">
+        <section class="quiz-panel" aria-labelledby="question-heading">
+          <div class="panel-heading">
+            <div>
+              <p class="panel-kicker">КЕЛЕСІ ТАПСЫРМА</p>
+              <h2 id="question-heading">Сұраққа жауап бер</h2>
+            </div>
+            <span id="question-number" class="question-number">1 / 38</span>
+          </div>
+
+          <div class="question-progress" aria-hidden="true">
+            <span id="question-progress-fill"></span>
+          </div>
+
+          <div class="question-card">
+            <div class="question-meta">
+              <span id="question-category" class="category-badge">ТАС ДӘУІРІ</span>
+              <span class="question-icon" aria-hidden="true">?</span>
+            </div>
+            <p id="question-text" class="question-text"></p>
+          </div>
+
+          <div id="answers" class="answers" role="group" aria-label="Жауап нұсқалары"></div>
+
+          <div id="feedback" class="feedback" role="status" aria-live="polite" hidden>
+            <div id="feedback-icon" class="feedback-icon" aria-hidden="true"></div>
+            <div>
+              <strong id="feedback-title"></strong>
+              <p id="feedback-text"></p>
+            </div>
+          </div>
+
+          <button id="primary-action" class="primary-action" type="button" hidden></button>
+
+          <div class="hint-card">
+            <span class="hint-symbol" aria-hidden="true">◌</span>
+            <p>Дұрыс жауап — бір пазл бөлігі. Қате жауапта бір жан жоғалады, бірақ ұпай шегерілмейді.</p>
+          </div>
+        </section>
+
+        <section class="puzzle-panel" aria-labelledby="puzzle-heading">
+          <div class="puzzle-heading-row">
+            <div>
+              <p class="panel-kicker">ТАРИХИ ПАЗЛ</p>
+              <h2 id="puzzle-heading">Суретті толық жина</h2>
+            </div>
+            <span class="puzzle-status" id="puzzle-status">Жабық бөліктер: 38</span>
+          </div>
+
+          <div class="topic-strip" aria-label="Тақырыптар">
+            <span class="topic-chip active">Тас дәуірі</span>
+            <span class="topic-chip">Палеолит</span>
+            <span class="topic-chip">Мезолит</span>
+            <span class="topic-chip">Неолит</span>
+            <span class="topic-chip">Алғашқы адамдар</span>
+            <span class="topic-chip">Қазақстан тұрақтары</span>
+          </div>
+
+          <div id="puzzle-board" class="puzzle-board" aria-label="Жабық пазл. Дұрыс жауаптардан кейін бөліктер ашылады.">
+            <div class="puzzle-art" aria-hidden="true"></div>
+            <div id="puzzle-grid" class="puzzle-grid"></div>
+            <div class="puzzle-sheen" aria-hidden="true"></div>
+          </div>
+          <p class="puzzle-caption"><span aria-hidden="true">✦</span> Әр дұрыс жауап тарихи суреттің бір бөлігін ашады.</p>
+        </section>
+      </div>
+
+      <footer class="game-footer">
+        <span>Тек Тас дәуірі тақырыптары</span>
+        <span class="footer-dot" aria-hidden="true"></span>
+        <span>3 жан · дұрыс жауапқа +1 ұпай</span>
+      </footer>
+    </main>
+
+    <div id="end-modal" class="modal-backdrop" role="presentation" hidden>
+      <section class="end-modal" role="alertdialog" aria-modal="true" aria-labelledby="end-title" aria-describedby="end-description">
+        <div id="end-emblem" class="end-emblem" aria-hidden="true">✦</div>
+        <p class="panel-kicker" id="end-kicker">ОЙЫН АЯҚТАЛДЫ</p>
+        <h2 id="end-title">ОЙЫН АЯҚТАЛДЫ</h2>
+        <p id="end-description" class="end-description"></p>
+        <div class="end-summary">
+          <div><span>Ұпай</span><strong id="end-score">0</strong></div>
+          <div><span>Ашылған пазл</span><strong id="end-puzzle">0 / 38</strong></div>
+        </div>
+        <button id="restart-button" class="primary-action modal-action" type="button">ҚАЙТА БАСТАУ</button>
+      </section>
+    </div>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>
